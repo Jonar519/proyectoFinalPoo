@@ -1,0 +1,25 @@
+# Despliegue en Render — https://render.com/docs/blueprint-spec
+# 1. Conecta el repositorio en Render → New → Blueprint
+# 2. Crea la base PostgreSQL y vincula las variables (o usa la BD externa ya creada)
+# 3. En el servicio Web, define SPRING_DATASOURCE_PASSWORD con el valor del panel de la BD
+
+services:
+  - type: web
+    name: aircontrol-pro-api
+    runtime: java
+    rootDir: backend
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -jar target/backend-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://dpg-d8bpcp4m0tmc73eoea0g-a.oregon-postgres.render.com:5432/trabajo_final_m90z?sslmode=require
+      - key: SPRING_DATASOURCE_USERNAME
+        value: trabajo_final_m90z_user
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGIN_PATTERNS
+        value: http://localhost:4200,https://*.onrender.com
