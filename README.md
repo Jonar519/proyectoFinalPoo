@@ -10,6 +10,92 @@ El proyecto sigue los principios de **Clean Architecture** y **SOLID**, utilizan
 - **Persistence Layer**: Repositorios JPA para el acceso a datos.
 - **Domain Layer**: Entidades de negocio con herencia y polimorfismo.
 
+## 🧭 Diseño
+
+### 1) Contexto
+```mermaid
+flowchart LR
+    U[Usuario Operativo / Administrador] --> FE[Frontend Angular]
+    FE --> API[Backend Spring Boot API]
+    API --> DB[(PostgreSQL)]
+    API --> AUTH[Autenticación JWT]
+    API --> FW[Flyway Migraciones]
+```
+
+### 2) Despliegue
+```mermaid
+flowchart TB
+    DEV[Desarrollador] --> GIT[Repositorio GitHub]
+    GIT --> RBE[Render Web Service - Backend]
+    GIT --> VFE[Vercel/Render Static - Frontend]
+    RBE --> RDB[(Render PostgreSQL)]
+    VFE -->|HTTPS API| RBE
+    U2[Usuario final] --> VFE
+```
+
+### 3) Conceptual
+```mermaid
+classDiagram
+    class Flight {
+      +id
+      +flightNumber
+      +airline
+      +scheduledDeparture
+      +status
+    }
+    class AirRoute {
+      +origin
+      +destination
+      +distanceKm
+    }
+    class AirportOperation {
+      <<abstract>>
+      +id
+      +operationTime
+      +status
+      +flightNumber
+      +validateOperation()
+    }
+    class Takeoff
+    class Landing
+    class Cargo
+    class Boarding
+    class FlightWorkflow {
+      +phase
+      +nextActionAt
+    }
+
+    Flight --> AirRoute
+    AirportOperation <|-- Takeoff
+    AirportOperation <|-- Landing
+    AirportOperation <|-- Cargo
+    AirportOperation <|-- Boarding
+    Flight "1" --> "1" FlightWorkflow
+```
+
+### 4) Desarrollo
+```mermaid
+flowchart LR
+    UI[Componentes Angular] --> SVCF[Servicios Frontend]
+    SVCF --> REST[REST Controllers]
+    REST --> APP[Servicios de Aplicación]
+    APP --> REPO[Repositorios JPA]
+    REPO --> PG[(PostgreSQL)]
+    APP --> WF[Servicio de Flujo / Scheduler]
+```
+
+### 5) Funcional
+```mermaid
+stateDiagram-v2
+    [*] --> SCHEDULED
+    SCHEDULED --> BOARDING: Llega hora programada
+    BOARDING --> DEPARTED: Carga completada
+    DEPARTED --> IN_FLIGHT: Despegue autorizado
+    IN_FLIGHT --> LANDING_IN_PROGRESS: Simulación 10 min
+    LANDING_IN_PROGRESS --> LANDED: Aterrizaje completado
+    LANDED --> [*]
+```
+
 ### 🧠 Implementación de POO Avanzada
 - **Herencia**: Jerarquías de usuarios (`User` -> `Admin`, `Controller`) y operaciones (`AirportOperation` -> `Takeoff`, `Landing`).
 - **Polimorfismo**: Método `validateOperation()` implementado de forma única en cada subclase de operación.
