@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import { API_V1 } from '../config/api.config';
 
 export interface MenuItem {
   id: number;
@@ -16,7 +17,7 @@ export interface MenuItem {
 })
 export class MenuService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/v1/menu';
+  private apiUrl = `${API_V1}/menu`;
 
   getMenu(): Observable<MenuItem[]> {
     return this.http.get<any>(this.apiUrl).pipe(

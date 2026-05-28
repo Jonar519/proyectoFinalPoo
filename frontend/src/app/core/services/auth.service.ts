@@ -2,6 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { API_V1 } from '../config/api.config';
 
 export interface UserData {
   token: string;
@@ -13,7 +14,7 @@ export interface UserData {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = '/api/v1/auth';
+  private apiUrl = `${API_V1}/auth`;
   
   // Signals for state management
   user = signal<UserData | null>(null);

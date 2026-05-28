@@ -315,6 +315,10 @@ classDiagram
 - RxJS & Signals (Gestión de Estado)
 - Reactive Forms
 
+## 🌐 Despliegue en producción (Render + Vercel)
+
+Guía paso a paso (casilla por casilla): **[DEPLOYMENT.md](./DEPLOYMENT.md)**
+
 ## 📦 Configuración y Ejecución Local
 
 ### 1. Base de Datos

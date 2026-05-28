@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import { API_V1 } from '../config/api.config';
 
 export interface OperationStep {
   operationId?: number;
@@ -24,7 +25,7 @@ export interface FlightWorkflowStatus {
 @Injectable({ providedIn: 'root' })
 export class WorkflowService {
   private http = inject(HttpClient);
-  private baseUrl = '/api/v1/flights';
+  private baseUrl = `${API_V1}/flights`;
 
   getAllWorkflows(): Observable<FlightWorkflowStatus[]> {
     return this.http.get<any>(`${this.baseUrl}/workflows`).pipe(map(res => res.data));

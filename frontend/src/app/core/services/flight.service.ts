@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import { API_V1 } from '../config/api.config';
 
 export interface Flight {
   id?: number;
@@ -18,7 +19,7 @@ export interface Flight {
 })
 export class FlightService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/v1/flights';
+  private apiUrl = `${API_V1}/flights`;
 
   getFlights(): Observable<Flight[]> {
     return this.http.get<any>(this.apiUrl).pipe(
