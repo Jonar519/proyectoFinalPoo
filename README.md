@@ -96,6 +96,203 @@ stateDiagram-v2
     LANDED --> [*]
 ```
 
+### 6) Diagrama de clases
+Diagrama del modelo de dominio del backend (entidades, herencia, interfaces y relaciones principales).
+
+```mermaid
+classDiagram
+    direction TB
+
+    %% --- Interfaces ---
+    class UserDetails {
+        <<interface Spring Security>>
+        +getUsername() String
+        +getPassword() String
+        +getAuthorities() Collection
+    }
+
+    class Monitorable {
+        <<interface>>
+        +getStatus() String
+        +updateStatus(newStatus) void
+    }
+
+    class Reportable {
+        <<interface>>
+        +generateReportData() Map
+        +getReportType() String
+    }
+
+    class Auditable {
+        <<interface>>
+        +getCreatedAt() LocalDateTime
+        +getCreatedBy() String
+        +getUpdatedAt() LocalDateTime
+        +getUpdatedBy() String
+    }
+
+    %% --- Usuarios ---
+    class User {
+        <<abstract>>
+        #Long id
+        #String username
+        #String password
+        #String email
+        #UserRole role
+        #boolean enabled
+    }
+
+    class Administrador {
+        -String department
+    }
+
+    class ControladorAereo {
+        -String licenseNumber
+        -Integer yearsExperience
+    }
+
+    class UserRole {
+        <<enumeration>>
+        ADMIN
+        CONTROLADOR
+        EMBARQUE
+        CARGA
+        OPERADOR
+    }
+
+    User <|-- Administrador
+    User <|-- ControladorAereo
+    User ..|> UserDetails
+    User --> UserRole
+
+    %% --- Vuelos y rutas ---
+    class Flight {
+        -Long id
+        -String flightNumber
+        -String airline
+        -String aircraftType
+        -LocalDateTime scheduledDeparture
+        -LocalDateTime scheduledArrival
+        -FlightStatus status
+    }
+
+    class AirRoute {
+        -Long id
+        -String origin
+        -String destination
+        -Double distance
+        +calculateTotalDistance() Double
+    }
+
+    class FlightStatus {
+        <<enumeration>>
+        SCHEDULED
+        BOARDING
+        DEPARTED
+        IN_FLIGHT
+        LANDED
+        CANCELLED
+        DELAYED
+    }
+
+    Flight --> AirRoute : route
+    Flight --> FlightStatus : status
+
+    AirRoute "0..*" --> "0..1" AirRoute : parentRoute / subRoutes
+
+    %% --- Operaciones aeroportuarias ---
+    class AirportOperation {
+        <<abstract>>
+        #Long id
+        #LocalDateTime operationTime
+        #String status
+        #String flightNumber
+        +validateOperation()* boolean
+        +getReportType()* String
+    }
+
+    class Takeoff {
+        -String runwayId
+        -Double windSpeed
+        -Double visibility
+        +validateOperation() boolean
+    }
+
+    class Landing {
+        -String approachPath
+        -Boolean fuelEmergency
+        +validateOperation() boolean
+    }
+
+    class Cargo {
+        -Double totalWeight
+        -Boolean hazardousMaterial
+        -String cargoZone
+        +validateOperation() boolean
+    }
+
+    class Boarding {
+        -Integer passengerCount
+        -Integer gateNumber
+        -Boolean crewReady
+        +validateOperation() boolean
+    }
+
+    AirportOperation <|-- Takeoff
+    AirportOperation <|-- Landing
+    AirportOperation <|-- Cargo
+    AirportOperation <|-- Boarding
+    AirportOperation ..|> Monitorable
+    AirportOperation ..|> Reportable
+    AirportOperation ..> Flight : flightNumber
+
+    %% --- Flujo operativo ---
+    class FlightWorkflow {
+        -Long id
+        -FlightWorkflowPhase phase
+        -LocalDateTime nextActionAt
+        -Long cargoOperationId
+        -Long takeoffOperationId
+        -Long landingOperationId
+        -LocalDateTime updatedAt
+    }
+
+    class FlightWorkflowPhase {
+        <<enumeration>>
+        WAITING_SCHEDULE
+        CARGO_IN_PROGRESS
+        TAKEOFF_IN_PROGRESS
+        IN_FLIGHT
+        LANDING_IN_PROGRESS
+        COMPLETED
+    }
+
+    Flight "1" --> "1" FlightWorkflow : workflow
+    FlightWorkflow --> FlightWorkflowPhase : phase
+    FlightWorkflow ..> Cargo : cargoOperationId
+    FlightWorkflow ..> Takeoff : takeoffOperationId
+    FlightWorkflow ..> Landing : landingOperationId
+
+    %% --- Menú dinámico recursivo ---
+    class MenuItem {
+        -Long id
+        -String label
+        -String icon
+        -String route
+        -String requiredRole
+        +findInHierarchy(targetLabel) MenuItem
+    }
+
+    MenuItem "0..*" --> "0..1" MenuItem : parent / children
+```
+
+**Notas del diagrama**
+- `User` usa herencia **SINGLE_TABLE** (`Administrador`, `ControladorAereo`).
+- `AirportOperation` usa herencia **JOINED** (`Takeoff`, `Landing`, `Cargo`, `Boarding`).
+- `validateOperation()` es el método polimórfico central de las operaciones.
+- `AirRoute` y `MenuItem` implementan estructuras recursivas en árbol.
+- `FlightWorkflow` orquesta el flujo automático del vuelo y referencia operaciones por ID.
+
 ### 🧠 Implementación de POO Avanzada
 - **Herencia**: Jerarquías de usuarios (`User` -> `Admin`, `Controller`) y operaciones (`AirportOperation` -> `Takeoff`, `Landing`).
 - **Polimorfismo**: Método `validateOperation()` implementado de forma única en cada subclase de operación.
